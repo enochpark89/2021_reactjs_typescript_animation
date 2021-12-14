@@ -235,3 +235,179 @@ const circleVariants = {
 - *DelayChildren* can delay the children component from appearing at a rate of speed you want to appear.
 - *StaggerChildren* means you you want to create a delay on each components so that each component will appear one after the other. 
 - x: and y: are very specific to Motion but others exist in CSS, which makes it convenient.
+
+Final - App.tsx
+```js
+import styled from "styled-components";
+import { motion } from "framer-motion";
+const Wrapper = styled.div`
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Box = styled(motion.div)`
+  width: 200px;
+  height: 200px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 40px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+`;
+
+const Circle = styled(motion.div)`
+  background-color: white;
+  height: 70px;
+  width: 70px;
+  place-self: center;
+  border-radius: 35px;
+  box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1), 0 10px 20px rgba(0, 0, 0, 0.06);
+`;
+
+const boxVariants = {
+  start: {
+    opacity: 0,
+    scale: 0.5,
+  },
+  end: {
+    scale: 1,
+    opacity: 1,
+    transition: {
+      type: "spring",
+      duration: 0.5,
+      bounce: 0.5,
+      delayChildren: 0.5,
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const circleVariants = {
+  start: {
+    opacity: 0,
+    y: 10,
+  },
+  end: {
+    opacity: 1,
+    y: 0,
+  },
+};
+
+function App() {
+  return (
+    <Wrapper>
+      <Box variants={boxVariants} initial="start" animate="end">
+        <Circle variants={circleVariants} />
+        <Circle variants={circleVariants} />
+        <Circle variants={circleVariants} />
+        <Circle variants={circleVariants} />
+      </Box>
+    </Wrapper>
+  );
+}
+export default App;
+
+```
+
+# 4. Gestures
+
+- you can use *whileHoever* prop in the box. 
+- you can do *whileTap* prop - clickw will initiate the aniimation. 
+- you can also use variants to make it easier. 
+- you can create a dragging with *whileDrag*
+- 
+
+```js
+      <Box
+        drag
+        variants={boxVariants}
+        whileHover="hover"
+        whileDrag="drag"
+        whileTap="click"
+      />
+```
+
+```js
+const boxVariants = {
+  hover: { scale: 1.5, rotateZ: 90 },
+  click: { scale: 1, borderRadius: "100px" },
+  drag: { backgroundColor: "rgb(46, 204, 113)", transition: { duration: 10 } },
+};
+
+function App() {
+  return (
+    <Wrapper>
+      <Box
+        drag
+        variants={boxVariants}
+        whileHover="hover"
+        whileDrag="drag"
+        whileTap="click"
+      />
+    </Wrapper>
+  );
+```
+
+- There are drags constraints. We can put a constraints.
+  1. lock the scroll to one direction. (only x) 
+  2. contraint on how far you can move. 
+  3. There is a force that could bring things to the center. 
+
+- You can create a reference and assign that to the prop for use. This is where the usefulness of useRef() comes in. 
+
+# MotionValue
+
+- MotionValue track the state and velocity of animating values. 
+- dragSnapToOrigin: come back to the center. 
+- If you want to keep track of the value of x or y, 
+- even if the component changes, it will not rerender.
+- Motion is keeping track of motionValue but it does not keep track witin ReactJS. 
+```js
+// the value is being tracked. 
+const x = useMotionValue(0); 
+  return (
+    <Wrapper>
+      <Box style={{ x }} drag="x" dragSnapToOrigin />
+    </Wrapper>
+  );
+}
+```
+- useTransform(): You are setting up different scenarios. 
+- when x is -800, you want to get 2, when 0 , you want to get 0 . 
+- We are basically mapping the value so that the x value will change as they reach certain point.
+
+```js
+import { motion, useMotionValue, useTransform } from "framer-motion";
+function App() {
+  const x = useMotionValue(0);
+  const scale = useTransform(x, [-800, 0, 800], [2, 1, 0.1]);
+  return (
+    <Wrapper>
+      <Box style={{ x, scale }} drag="x" dragSnapToOrigin />
+    </Wrapper>
+  );
+}
+```
+
+- Therefore, you can modify the scale. 
+
+*What can you do more with userTransform?*
+
+1. RotateZ
+2. Change background depending on the location of a component gradually using gradient. 
+```js
+  const rotateZ = useTransform(x, [-800, 800], [-360, 360]);
+  const gradient = useTransform(
+    x,
+    [-800, 800],
+    [
+      "linear-gradient(135deg, rgb(0, 210, 238), rgb(0, 83, 238))",
+      "linear-gradient(135deg, rgb(0, 238, 155), rgb(238, 178, 0))",
+    ]
+  );
+  const { scrollYProgress } = useViewportScroll();
+  const scale = useTransform(scrollYProgress, [0, 1], [1, 5]);
+```
