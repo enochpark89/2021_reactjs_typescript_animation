@@ -358,7 +358,7 @@ function App() {
 
 - You can create a reference and assign that to the prop for use. This is where the usefulness of useRef() comes in. 
 
-# MotionValue
+# 5. MotionValue
 
 - MotionValue track the state and velocity of animating values. 
 - dragSnapToOrigin: come back to the center. 
@@ -411,3 +411,176 @@ function App() {
   const { scrollYProgress } = useViewportScroll();
   const scale = useTransform(scrollYProgress, [0, 1], [1, 5]);
 ```
+
+# 6. SVG Animation
+
+- Create your own Svg using styled component
+```js
+const Svg = styled.svg`
+  width: 300px;
+  height: 300px;
+  path {
+    stroke: white;
+    stroke-width: 2;
+  }
+```
+
+# 7. AnimatePresence
+
+- Pop up window animation can be done with *AnimatePresence*
+Steps:
+1. Import AnimatePresence
+2. Wrap around <AnimatePresence>
+3. Create a <Box> 
+4. Set <Box> props variants, initial, animate, exit. 
+
+# 8. Slider
+
+- You can create 10 boxes and a slider with it. 
+- Create one box at a time using useState()
+```js
+// if the AnimatePresence is showing the number that we want, we 
+const [visible, set setVisible] = useState(1);
+    
+    <AnimatePresence>
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) =>
+        i === visible ? (
+          <Box
+            variants={box}
+            initial="invisible"
+            animate="visible"
+            exit="exit"
+            key={i}
+          >
+            {i}
+          </Box>
+        ) : null
+      )}
+    </AnimatePresence>
+
+```
+
+- You can create a button that will render the next page (increment the visibile state). 
+
+- Once you create a button that renders the next page, you can create animation. 
+```js
+const box = {
+  invisible: {
+    x: 500,
+    opacity: 0,
+    scale: 0,
+  },
+  visible: {
+    x: 0,
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 1,
+    },
+  },
+```
+
+- Problem: Slider shake right to the left. 
+- Make it absolute.
+
+## 9.  Direction in the slider
+
+- Make the code smaller - refactor the code. 
+- You can change the direction
+- cutom prop allows us to send data to our varient. 
+
+- Varient into function > get one argument > get from the custom prop of a Box component. 
+- Depending on what button that the user choose (either prev and forward. 
+
+
+# 10. Layout animation and super layout animation. 
+
+- click > hide/unhide circle. 
+- useState()
+- create toggleClicked() function that alternative between one or the other. 
+
+- We can join two Box component with layoutID.
+- If we give the same Id for both Boxes, it will treat as same component. It creates a connection between the two. 
+- Use framer-motion
+
+# 11. Box animation to make it bigger
+
+Step:
+
+1. Create a Grid and wrap around boxes. 
+```js
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  width: 50vw;
+  gap: 10px;
+  div:first-child,
+  div:last-child {
+    grid-column: span 2;
+  }
+`;
+
+function App() {
+  return (
+    <Grid>
+      {["1", "2", "3", "4"].map((n) => (
+        <Box onClick={() => setId(n)} key={n} layoutId={n} />
+      ))}
+  </Grid>
+  )
+}
+```
+2. Create an overlay that will cover all material.
+
+- use motion div
+
+```js
+const Overlay = styled(motion.div)`
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+// this create a dark cloud over all content
+const overlay = {
+  hidden: { backgroundColor: "rgba(0, 0, 0, 0)" },
+  visible: { backgroundColor: "rgba(0, 0, 0, 0.5)" },
+  exit: { backgroundColor: "rgba(0, 0, 0, 0)" },
+};
+
+function App() {
+  <Wrapper>
+    <AnimatePresence>
+        {id ? (
+          <Overlay
+            variants={overlay}
+            onClick={() => setId(null)}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            <Box layoutId={id} style={{ width: 400, height: 200 }} />
+          </Overlay>
+        ) : null}
+    </AnimatePresence>
+  </Wrapper>
+}
+```
+
+3. Make the box appear in the middle. 
+
+4. Animate the box motion to make it smooth. 
+
+- Two seperate component which is the box clicked and box appear can be connected using the framer motion library.
+- layoutID will connect the box and do the motion already. 
+
+*useState<null | strip>: could be a null or a string*
+
+5. You can create the same effect for multiple boxes. 
+- You can make make the each number ID for each boxes. 
+- depending on which ID was clicked, we can render different content for users. 
+
+(Next will be netflix clone using the concepts we learned)
